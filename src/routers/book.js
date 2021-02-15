@@ -1,7 +1,7 @@
 const express = require('express')
-const router = new express.Router()
-
 const Book = require('../models/book')
+const adminAuth = require('../middleware/adminAuth')
+const router = new express.Router()
 
 router.post('/books', async (req, res) => {
     const book = new Book({ ...req.body })
@@ -24,17 +24,32 @@ router.get('/books', async (req, res) => {
     }
 })
 
-router.patch('/books/:name', async (req, res) => {
-    const name = req.params.name
+router.patch('/books/:id', async (req, res) => {
+    const updates = Object.keys(req.body)
+    const allowedUpdates = [
+        'title',
+        'author',
+        'publisher',
+        'publicationDate',
+        'language',
+        'description',
+        'priceUSD',
+        'imgURL',
+    ]
+    const isValidOperation = updates.every((update) =>
+        allowedUpdates.includes(update)
+    )
+
+    if (!isValidOperation) {
+        return res.status(400).send({ error: 'Invalid updates!' })
+    }
 
     try {
-        const book = await Book.findOne({ name })
+        const book = await Book.findById(req.params.id)
 
         if (!book) {
             return res.status(404).send()
         }
-
-        const updates = Object.keys(req.body)
 
         updates.forEach((update) => {
             book[update] = req.body[update]
