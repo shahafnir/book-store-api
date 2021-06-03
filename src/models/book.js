@@ -1,22 +1,20 @@
 const mongoose = require('mongoose')
+const mongoosePaginate = require('mongoose-paginate')
 
 const bookSchema = new mongoose.Schema(
     {
         title: {
             type: String,
-            lowercase: true,
             trim: true,
             required: true,
         },
         author: {
             type: String,
-            lowercase: true,
             trim: true,
             required: true,
         },
         publisher: {
             type: String,
-            lowercase: true,
             trim: true,
             required: true,
         },
@@ -26,13 +24,11 @@ const bookSchema = new mongoose.Schema(
         },
         language: {
             type: String,
-            lowercase: true,
             trim: true,
             required: true,
         },
         description: {
             type: String,
-            lowercase: true,
             trim: true,
             required: true,
         },
@@ -51,6 +47,8 @@ const bookSchema = new mongoose.Schema(
         timestamps: true,
     }
 )
+
+bookSchema.plugin(mongoosePaginate)
 
 const Book = mongoose.model('Book', bookSchema)
 

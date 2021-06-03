@@ -76,13 +76,10 @@ userSchema.methods.getCart = async function () {
 
     let cart = user.carts[0]
 
-    if (cart) {
-        await cart.populate('books').execPopulate()
-    } else {
+    if (!cart) {
         cart = new Cart({
             owner: user._id,
         })
-
         await cart.save()
     }
 

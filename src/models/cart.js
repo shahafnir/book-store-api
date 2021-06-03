@@ -1,17 +1,30 @@
 const mongoose = require('mongoose')
+const Book = require('./book')
 
 const cartSchema = new mongoose.Schema(
     {
-        books: [
+        items: [
             {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Book',
+                bookId: {
+                    type: String,
+                },
+                amount: {
+                    type: Number,
+                },
+                title: {
+                    type: String,
+                },
+                author: {
+                    type: String,
+                },
+                priceUSD: {
+                    type: Number,
+                },
             },
         ],
         owner: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
-            unique: true,
             required: true,
         },
     },
@@ -22,25 +35,66 @@ const cartSchema = new mongoose.Schema(
 
 cartSchema.methods.addItem = async function (bookId) {
     const cart = this
+    const book = await Book.findById(bookId)
 
-    cart.books = cart.books.concat({
-        _id: bookId,
-    })
+    const itemFoundInCart = cart.items.find((item) => item.bookId === bookId)
+
+    if (!itemFoundInCart) {
+        cart.items.push({
+            bookId,
+            amount: 1,
+            title: book.title,
+            author: book.author,
+            priceUSD: book.priceUSD,
+        })
+    } else {
+        itemFoundInCart.amount++
+    }
 
     await cart.save()
-
-    await cart.populate('books').execPopulate()
 }
 
 cartSchema.methods.removeItem = async function (bookId) {
     const cart = this
 
-    for (let itemInd = 0; itemInd < cart.books.length; itemInd++) {
-        if (cart.books[itemInd]._id.toString() === bookId) {
-            cart.books.splice(itemInd, 1)
+    for (let itemInd = 0; itemInd < cart.items.length; itemInd++) {
+        if (cart.items[itemInd].bookId.toString() === bookId) {
+            cart.items.splice(itemInd, 1)
             break
         }
     }
+
+    await cart.save()
+}
+
+cartSchema.methods.reduceAmount = async function (bookId) {
+    const cart = this
+
+    const item = cart.items.find((item) => item.bookId === bookId)
+
+    if (!item) {
+        throw new Error({ error: 'Item not exist' })
+    }
+
+    if (item.amount > 1) {
+        item.amount--
+    } else {
+        return cart.removeItem(bookId)
+    }
+
+    await cart.save()
+}
+
+cartSchema.methods.icreaseAmount = async function (bookId) {
+    const cart = this
+
+    const item = cart.items.find((item) => item.bookId === bookId)
+
+    if (!item) {
+        throw new Error({ error: 'Item not exist' })
+    }
+
+    item.amount++
 
     await cart.save()
 }
