@@ -99,6 +99,38 @@ cartSchema.methods.icreaseAmount = async function (bookId) {
     await cart.save()
 }
 
+cartSchema.methods.update = async function (items) {
+    const cart = this
+
+    try {
+        await items.forEach(async (itemToUpdate, itemNumber) => {
+            const itemInCart = cart.items.find(
+                (item) => item.bookId === itemToUpdate.bookId
+            )
+
+            if (!itemInCart) {
+                const book = await Book.findById(itemToUpdate.bookId)
+
+                cart.items.push({
+                    bookId: book._id,
+                    amount: itemToUpdate.amount,
+                    title: book.title,
+                    author: book.author,
+                    priceUSD: book.priceUSD,
+                })
+            } else {
+                itemInCart.amount += itemToUpdate.amount
+            }
+
+            if (itemNumber === items.length - 1) {
+                await cart.save()
+            }
+        })
+    } catch (error) {
+        throw new Error(error)
+    }
+}
+
 const Cart = mongoose.model('Cart', cartSchema)
 
 module.exports = Cart

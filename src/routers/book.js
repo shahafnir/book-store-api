@@ -38,7 +38,12 @@ router.get('/books', async (req, res) => {
         if (req.query[option]) {
             switch (option) {
                 case 'publicationDate':
-                    match[option] = req.query[option]
+                    const startDate = req.query[option]
+                    const endDate = startDate + 'T23:59:59'
+                    match[option] = {
+                        $gt: startDate,
+                        $lt: endDate,
+                    }
                     break
                 case 'price':
                     const minMaxValues = req.query[option].split(':')

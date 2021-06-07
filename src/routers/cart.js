@@ -1,5 +1,6 @@
 const express = require('express')
 const userAuth = require('../middleware/userAuth')
+const Book = require('../models/book')
 const router = new express.Router()
 
 router.post('/cart/add-item/:id', userAuth, async (req, res) => {
@@ -61,6 +62,15 @@ router.get('/cart', userAuth, async (req, res) => {
         res.send(cart)
     } catch (error) {
         res.status(500).send()
+    }
+})
+
+router.patch('/cart', userAuth, async (req, res) => {
+    try {
+        const cart = await req.user.getCart()
+        await cart.update(req.body.items)
+    } catch (error) {
+        res.status(400).send(error)
     }
 })
 
