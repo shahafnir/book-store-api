@@ -15,7 +15,7 @@ app.use(cors())
 app.use(express.json())
 
 app.use('/', (req, res) => {
-    res.send('ok')
+    res.redirect('/books')
 })
 
 app.use(routers)
