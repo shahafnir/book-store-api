@@ -3,7 +3,7 @@ const app = require('./app')
 const port = process.env.PORT
 
 app.use('/', (req, res) => {
-    res.send(ok)
+    res.send()
 })
 
 app.listen(port, () => {
