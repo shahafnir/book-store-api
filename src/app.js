@@ -13,6 +13,11 @@ const app = express()
 
 app.use(cors())
 app.use(express.json())
+
+app.use('/', (req, res) => {
+    res.send('ok')
+})
+
 app.use(routers)
 
 module.exports = app
